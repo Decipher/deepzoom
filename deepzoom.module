@@ -259,10 +259,11 @@ function theme_deepzoom($variables) {
 
   foreach ($images as $md5 => $uri) {
     if ($status[$uri]) {
+      $dzi = file_create_url("public://deepzoom/{$md5}.dzi");
       // Seadragon initilization script.
       $element['#attached']['js']["Seadragon.Utils.addEvent(window, 'load', function() {
         viewer = new Seadragon.Viewer('deepzoom-{$md5}');
-        viewer.openDzi('/sites/d7.ld/files/deepzoom/{$md5}.dzi');
+        viewer.openDzi('{$dzi}');
       });"] = array('type' => 'inline');
 
       // Seadragon container.
