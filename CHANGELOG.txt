@@ -1,4 +1,4 @@
-Deep Zoom 7.x-1.x-dev, xxxx-xx-xx (development release)
+Deep Zoom 7.x-1.1, 2011-10-01
 --------------------------------------------------------------------------------
 
 - #1296028: Fixed issue with generating .dzi file in Apache.
