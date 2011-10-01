@@ -53,6 +53,17 @@ function deepzoom_theme() {
 }
 
 /**
+ * Implements hook_page_alter().
+ */
+function deepzoom_page_alter($variables) {
+  drupal_add_css(drupal_get_path('module', 'deepzoom') . '/deepzoom.css');
+  drupal_add_js(drupal_get_path('module', 'deepzoom') . '/deepzoom.js');
+  drupal_add_js(libraries_get_path('seadragon') . '/seadragon-min.js');
+  drupal_add_js('Seadragon.Config.imagePath = "' . base_path() . libraries_get_path('seadragon') . '/img/";', 'inline');
+  drupal_add_js(array('deepzoom' => file_create_url('public://deepzoom')), 'setting');
+}
+
+/**
  * Deep Zoom generator callback.
  */
 function deepzoom_generate_deepzoom($images, $method = 'batch') {
@@ -241,32 +252,13 @@ function deepzoom_generate_image_info($uri, $md5) {
  * Theme function; Deep Zoom.
  */
 function theme_deepzoom($variables) {
-  $element = array(
-    '#attached' => array(
-      'js' => array(
-        libraries_get_path('seadragon') . '/seadragon-min.js',
-        // @TODO - Expose Config to administration.
-        'Seadragon.Config.imagePath = "' . base_path() . libraries_get_path('seadragon') . '/img/";' => array('type' => 'inline'),
-      ),
-      'css' => array(
-        drupal_get_path('module', 'deepzoom') . '/deepzoom.css',
-      ),
-    )
-  );
+  $element = array();
 
   $images = is_array($variables['images']) ? $variables['images'] : array(md5_file($variables['images']) => $variables['images']);
   $status = deepzoom_generate_deepzoom($images, 'batch');
 
   foreach ($images as $md5 => $uri) {
     if ($status[$uri]) {
-      $dzi = file_create_url("public://deepzoom/{$md5}.dzi");
-      // Seadragon initilization script.
-      $element['#attached']['js']["Seadragon.Utils.addEvent(window, 'load', function() {
-        viewer = new Seadragon.Viewer('deepzoom-{$md5}');
-        viewer.openDzi('{$dzi}');
-      });"] = array('type' => 'inline');
-
-      // Seadragon container.
       $element[] = array(
         '#markup' => "<div id='deepzoom-{$md5}' class='deepzoom'></div>",
       );

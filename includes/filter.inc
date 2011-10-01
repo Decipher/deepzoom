@@ -60,9 +60,10 @@ function deepzoom_filter_deepzoom_process($text, $filter, $format, $langcode, $c
   if (preg_match_all('/<img(?=[^>]*src=[\'"](.*?)[\'"])(?=[^>]*class=[\'"].*?(?<=[\s\'"])deepzoom(?=[\s\'"]+).*?[\'"]).*?\/>/', $text, $matches, PREG_SET_ORDER)) {
     global $base_url;
     foreach ($matches as $match) {
-      $uri = str_replace(str_replace($base_url, '', file_create_url('public://')), 'public://', $match[1]);
-      if (file_valid_uri($uri) && file_exists($uri)) {
-        $text = str_replace($match[0], render(theme('deepzoom', array('images' => $uri))), $text);
+      $match[1] = str_replace(file_create_url('public://'), 'public://', $match[1]);
+      $match[1] = str_replace(str_replace($base_url, '', file_create_url('public://')), 'public://', $match[1]);
+      if (file_valid_uri($match[1]) && file_exists($match[1])) {
+        $text = str_replace($match[0], render(theme('deepzoom', array('images' => $match[1]))), $text);
       }
     }
   }
