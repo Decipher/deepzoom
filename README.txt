@@ -2,11 +2,12 @@ The Deep Zoom module provides the ability to create interactively viewable
 high-resolution images using the Microsoft Deep Zoom file format and the
 Seadragon Ajax library, ala Zoom.it but hosted 100% locally.
 
-Deep Zoom was written and is maintained by Stuart Clark (deciphered) of
-Realityloop Pty Ltd.
+Deep Zoom was written Stuart Clark and is maintained by Stuart Clark (deciphered) 
+and Brian Gilbert (realityloop) of Realityloop Pty Ltd.
 - http://www.realityloop.com
+- http://twitter.com/realityloop
 
-Deep Zoom development was sponsored by the State Library of Victoria.
+Deep Zoom development was initially sponsored by the State Library of Victoria.
 - http://www.slv.vic.gov.au
 
 
