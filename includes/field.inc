@@ -13,6 +13,7 @@ function deepzoom_field_formatter_info() {
       'label' => t('Deep Zoom'),
       'field types' => array('image'),
       'settings' => array(
+        'deepzoom_processor' => 'batch',
         'deepzoom_image_style' => 'large'
       ),
     ),
@@ -29,7 +30,8 @@ function deepzoom_field_formatter_settings_summary($field, $instance, $view_mode
   $summary = '';
 
   if ($display['type'] == 'deepzoom_deepzoom') {
-    $summary = t('Fallback image style: @image_style', array('@image_style' => $settings['deepzoom_image_style']));
+    $summary .= t('DeepZoom processor: @processor', array('@processor' => $settings['deepzoom_processor'])) . '<br />';
+    $summary .= t('Fallback image style: @image_style', array('@image_style' => $settings['deepzoom_image_style']));
   }
 
   return $summary;
@@ -45,6 +47,15 @@ function deepzoom_field_formatter_settings_form($field, $instance, $view_mode, $
   $element = array();
 
   if ($display['type'] == 'deepzoom_deepzoom') {
+    $info = module_invoke_all('deepzoom_processor_info');
+    $element['deepzoom_processor'] = array(
+      '#title' => t('Processor'),
+      '#type' => 'select',
+      '#default_value' => $settings['deepzoom_processor'],
+      '#options' => drupal_map_assoc(array_keys($info)),
+      '#required' => TRUE,
+    );
+
     $element['deepzoom_image_style'] = array(
       '#title' => t('Fallback image style'),
       '#type' => 'select',
@@ -71,5 +82,5 @@ function deepzoom_field_formatter_view($obj_type, $object, $field, $instance, $l
     $images[md5_file($item['uri'])] = $item['uri'];
   }
 
-  return count($images) ? theme('deepzoom', array('images' => $images, 'image_style' => $settings['deepzoom_image_style'])) : FALSE;
+  return count($images) ? theme('deepzoom', array('images' => $images, 'image_style' => $settings['deepzoom_image_style'], 'processor' => $settings['deepzoom_processor'])) : FALSE;
 }

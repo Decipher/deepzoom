@@ -2,9 +2,16 @@ name = "Deep Zoom"
 description = "Deep Zoom provides the ability to create interactively viewable high-resolution images."
 core = 7.x
 
+; Dependencies.
 dependencies[] = image
 dependencies[] = libraries
 
+; Core files.
 files[] = deepzoom.module
+
+; Module integrations.
+files[] = includes/background_batch.module
+files[] = includes/deepzoom.module
 files[] = includes/field.module
 files[] = includes/filter.module
+files[] = includes/system.module

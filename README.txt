@@ -26,6 +26,12 @@ Required Modules
 * Libraries API - http://drupal.org/project/libraries
 
 
+Required Modules
+--------------------------------------------------------------------------------
+
+* Background Batch (via Background Process) - http://drupal.org/project/background_process
+
+
 Installation
 --------------------------------------------------------------------------------
 
