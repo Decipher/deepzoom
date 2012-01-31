@@ -1,5 +1,6 @@
 name = "Deep Zoom"
 description = "Deep Zoom provides the ability to create interactively viewable high-resolution images."
+configure = admin/config/media/deepzoom
 core = 7.x
 
 ; Dependencies.
