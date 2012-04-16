@@ -13,6 +13,9 @@ function deepzoom_requirements($phase) {
   $t = get_t();
 
   // Seadragon Ajax library.
+  if (!function_exists('libraries_get_libraries')) {
+    module_enable(array('libraries'));
+  }
   if (!in_array('seadragon', array_keys(libraries_get_libraries()))) {
     $requirements['seadragon'] = array(
       'title' => $t('Seadragon Ajax library'),

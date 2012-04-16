@@ -1,6 +1,7 @@
 Deep Zoom 7.x-1.x-dev, xxxx-xx-xx (Development release)
 --------------------------------------------------------------------------------
 
+- Fixed issue when installing with Libraries module disabled.
 - Added processor hook and settings.
 - Added Background Batch processor.
 
