@@ -394,7 +394,7 @@ function theme_deepzoom($variables) {
   foreach ($images as $md5 => $uri) {
     if ($status[$uri]) {
       $element[] = array(
-        '#markup' => "<div id='deepzoom-{$md5}' class='deepzoom'></div>",
+        '#markup' => "<div id='deepzoom-{$md5}-" . rand(1000, 9999) . "' class='deepzoom'></div>",
       );
     }
 
