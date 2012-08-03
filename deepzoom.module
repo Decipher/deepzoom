@@ -64,8 +64,8 @@ function deepzoom_menu() {
   $items = array();
 
   $items['admin/config/media/deepzom'] = array(
-    'title' => 'Deepzoom',
-    'description' => t('Configure defaults for Deep Zoom images.'),
+    'title' => 'Deep Zoom',
+    'description' => 'Configure defaults for Deep Zoom images.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('deepzoom_configuration_form'),
     'access arguments' => array('administer deepzoom'),
@@ -82,28 +82,21 @@ function deepzoom_page_alter($variables) {
   drupal_add_css(drupal_get_path('module', 'deepzoom') . '/deepzoom.css');
   drupal_add_js(drupal_get_path('module', 'deepzoom') . '/deepzoom.js');
   drupal_add_js(libraries_get_path('seadragon') . '/seadragon-min.js');
-  drupal_add_js(array('deepzoom' => file_create_url('public://deepzoom')), 'setting');
+  drupal_add_js(array('deepZoom' => array(
+    'path' => file_create_url('public://deepzoom')
+  )), 'setting');
 
-  $config = deepzoom_load_defaults();
-  foreach (deepzoom_load_defaults() as $key => $value) {
-    switch (TRUE) {
-      case is_bool($value):
-        $value = $value == TRUE ? 'true' : 'false';
-        break;
-
-      case is_string($value):
-        $value = "'{$value}'";
-        break;
-    }
-
-    drupal_add_js("Seadragon.Config.{$key} = {$value};", 'inline');
+  $config = 'public://deepzoom/deepzoom_config.js';
+  if (!file_exists($config)) {
+    deepzoom_configuration_form_submit();
   }
+  drupal_add_js($config);
 }
 
 /**
  *
  */
-function deepzoom_configuration_form($form, &$form_alter) {
+function deepzoom_configuration_form($form, &$form_state) {
   $config = deepzoom_load_defaults();
 
   $form['deepzoom_config'] = array(
@@ -300,6 +293,28 @@ function deepzoom_configuration_form($form, &$form_alter) {
   );
 
   return system_settings_form($form);
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function deepzoom_form_deepzoom_configuration_form_alter(&$form, $form_state) {
+  $form['#submit'][] = 'deepzoom_configuration_form_submit';
+}
+
+/**
+ * Submit callback form Deep Zoom configuration form.
+ */
+function deepzoom_configuration_form_submit($form = array(), $form_state = array()) {
+  $directory = 'public://deepzoom';
+  if (file_prepare_directory($directory, FILE_CREATE_DIRECTORY)) {
+    $data = '';
+    foreach (deepzoom_load_defaults() as $key => $value) {
+      $data .= "Seadragon.Config.{$key} = " . drupal_json_encode($value) . ";\r\n";
+    }
+    file_save_data($data, "{$directory}/deepzoom_config.js", FILE_EXISTS_REPLACE);
+    drupal_flush_all_caches();
+  }
 }
 
 /**

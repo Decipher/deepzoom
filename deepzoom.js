@@ -5,7 +5,7 @@
         $('.deepzoom').each(function() {
           id = $(this).attr('id').split('-');
           viewer = new Seadragon.Viewer(id.join('-'));
-          viewer.openDzi(Drupal.settings.deepzoom + '/' + id[1] + '.dzi');
+          viewer.openDzi(Drupal.settings.deepZoom.path + '/' + id[1] + '.dzi');
         });
       });
     }
