@@ -35,12 +35,11 @@ function deepzoom_permission() {
 function deepzoom_theme() {
   $items = array();
 
-  $items['deepzoom'] = array(
+  $items['deepzoom_wrapper'] = array(
     'variables' => array(
-      'images' => array(),
-      'image_style' => 'large',
-      'processor' => 'batch',
+      'md5' => NULL,
     ),
+    'template' => 'templates/deepzoom_wrapper',
   );
 
   $items['deepzoom_dzi'] = array(
@@ -51,8 +50,11 @@ function deepzoom_theme() {
       'width' => NULL,
       'height' => NULL,
     ),
-    'template' => 'deepzoom',
+    'template' => 'templates/deepzoom_dzi',
   );
+
+  // Allow other modules to add/alter theme items.
+  drupal_alter('deepzoom_theme', $items);
 
   return $items;
 }
@@ -63,12 +65,13 @@ function deepzoom_theme() {
 function deepzoom_menu() {
   $items = array();
 
-  $items['admin/config/media/deepzom'] = array(
+  $items['admin/config/media/deepzoom'] = array(
     'title' => 'Deep Zoom',
     'description' => 'Configure defaults for Deep Zoom images.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('deepzoom_configuration_form'),
     'access arguments' => array('administer deepzoom'),
+    'file' => 'deepzoom.admin.inc',
     'type' => MENU_NORMAL_ITEM,
   );
 
@@ -79,274 +82,27 @@ function deepzoom_menu() {
  * Implements hook_page_alter().
  */
 function deepzoom_page_alter($variables) {
+  $config = variable_get('deepzoom_config', array());
+  $engines = deepzoom_get_engines();
+  $engine = $config['engine'];
+
   drupal_add_css(drupal_get_path('module', 'deepzoom') . '/deepzoom.css');
-  drupal_add_js(drupal_get_path('module', 'deepzoom') . '/deepzoom.js');
-  drupal_add_js(libraries_get_path('seadragon') . '/seadragon-min.js');
-  drupal_add_js(array('deepZoom' => array(
-    'path' => file_create_url('public://deepzoom')
-  )), 'setting');
 
-  $config = 'public://deepzoom/deepzoom_config.js';
-  if (!file_exists($config)) {
-    deepzoom_configuration_form_submit();
-  }
-  drupal_add_js($config);
-}
-
-/**
- *
- */
-function deepzoom_configuration_form($form, &$form_state) {
-  $config = deepzoom_load_defaults();
-
-  $form['deepzoom_config'] = array(
-    '#type' => 'container',
-    '#tree' => TRUE,
-  );
-
-  $form['deepzoom_config']['debugMode'] = array(
-    '#title' => t('Debug mode'),
-    '#type' => 'checkbox',
-    '#default_value' => $config['debugMode'],
-    '#description' => t('Whether messages should be logged and fail-fast behavior should be provided.'),
-  );
-
-  $form['deepzoom_config']['animationTime'] = array(
-    '#title' => t('Animation time'),
-    '#type' => 'textfield',
-    '#element_validate' => array('element_validate_number'),
-    '#default_value' => $config['animationTime'],
-    '#description' => t('The amount of time in seconds that animations should last.'),
-  );
-
-  $form['deepzoom_config']['blendTime'] = array(
-    '#title' => t('Blend time'),
-    '#type' => 'textfield',
-    '#element_validate' => array('element_validate_number'),
-    '#default_value' => $config['blendTime'],
-    '#description' => t('The amount of time in seconds that new tiles take to blend from transparent to opaque.'),
-  );
-
-  $form['deepzoom_config']['alwaysBlend'] = array(
-    '#title' => t('Always blend'),
-    '#type' => 'checkbox',
-    '#default_value' => $config['alwaysBlend'],
-    '#description' => t('Whether tiles should always blend in and out, not just when they\'re first loaded.'),
-  );
-
-  $form['deepzoom_config']['autoHideControls'] = array(
-    '#title' => t('Auto hide controls'),
-    '#type' => 'checkbox',
-    '#default_value' => $config['autoHideControls'],
-    '#description' => t('Whether controls should get automatically hidden when the user\'s mouse is off the viewer and the image has stopped animating.'),
-  );
-
-  $form['deepzoom_config']['immediateRender'] = array(
-    '#title' => t('Immediate render'),
-    '#type' => 'checkbox',
-    '#default_value' => $config['immediateRender'],
-    '#description' => t('Whether the most appropriate tiles should always be rendered first, before any lower-res tiles are rendered. This loses the "sharpening" effect and instead creates a very visible "tiling" effect.'),
-  );
-
-  $form['deepzoom_config']['wrapHorizontal'] = array(
-    '#title' => t('Wrap horizontal'),
-    '#type' => 'checkbox',
-    '#default_value' => $config['wrapHorizontal'],
-    '#description' =>
-      t('Whether tiles should be "wrapped" horizontally, so that there are no left or right edges.') . '<br />' .
-      '<strong>' . t('NOTE: this is an experimental API and is not guaranteed to work. The API is also very likely to change in the future. Use at your own risk!') . '</strong>',
-  );
-
-  $form['deepzoom_config']['wrapVertical'] = array(
-    '#title' => t('Wrap vertical'),
-    '#type' => 'checkbox',
-    '#default_value' => $config['wrapVertical'],
-    '#description' =>
-      t('Whether tiles should be "wrapped" vertically, so that there are no top or bottom edges.') . '<br />' .
-      '<strong>' . t('NOTE: this is an experimental API and is not guaranteed to work. The API is also very likely to change in the future. Use at your own risk!') . '</strong>',
-  );
-
-  $form['deepzoom_config']['wrapOverlays'] = array(
-    '#title' => t('Wrap overlays'),
-    '#type' => 'checkbox',
-    '#default_value' => $config['wrapOverlays'],
-    '#description' =>
-      t('Whether overlays should be continually re-positioned to match any horizontal or vertical wrapping. This has no effect if neither wrapHorizontal nor wrapVertical are set.') . '<br />' .
-      '<strong>' . t('NOTE: this is an experimental API and is not guaranteed to work. The API is also very likely to change in the future. Use at your own risk!') . '</strong>',
-  );
-
-  $form['deepzoom_config']['transformOverlays'] = array(
-    '#title' => t('Transform overlays'),
-    '#type' => 'checkbox',
-    '#default_value' => $config['transformOverlays'],
-    '#description' =>
-      t('Whether overlays should be scaled using !link rather than regular block sizing, in browsers that support it. This smoothly scales overlays and their content, including text, but the results may not appear the same in other browsers.', array('!link' => l(t('CSS transforms'), 'http://www.w3.org/TR/css3-2d-transforms/'))) . '<br />' .
-      '<strong>' . t('NOTE: this is an experimental API and is not guaranteed to work. The API is also very likely to change in the future. Use at your own risk!') . '</strong>',
-  );
-
-  $form['deepzoom_config']['minZoomImageRatio'] = array(
-    '#title' => t('Minimum zoom image ratio'),
-    '#type' => 'textfield',
-    '#element_validate' => array('element_validate_number'),
-    '#default_value' => $config['minZoomImageRatio'],
-    '#description' => t('The minimum image ratio (image size to viewer size) in both dimensions that can result from zooming out.'),
-  );
-
-  $form['deepzoom_config']['maxZoomPixelRatio'] = array(
-    '#title' => t('Maximum zoom pixel ratio'),
-    '#type' => 'textfield',
-    '#element_validate' => array('element_validate_number'),
-    '#default_value' => $config['maxZoomPixelRatio'],
-    '#description' => t('The maximum pixel ratio (screen pixel to content pixel) that can result from zooming in.'),
-  );
-
-  $form['deepzoom_config']['visibilityRatio'] = array(
-    '#title' => t('Visibility ratio'),
-    '#type' => 'textfield',
-    '#element_validate' => array('element_validate_number'),
-    '#default_value' => $config['visibilityRatio'],
-    '#description' => t('The minimum portion of the viewport that must show visible content in both dimensions.'),
-  );
-
-  $form['deepzoom_config']['springStiffness'] = array(
-    '#title' => t('Spring stiffness'),
-    '#type' => 'textfield',
-    '#element_validate' => array('element_validate_number'),
-    '#default_value' => $config['springStiffness'],
-    '#description' => t('Determines how sharply the springs used for animations move.'),
-  );
-
-  $form['deepzoom_config']['imageLoaderLimit'] = array(
-    '#title' => t('Image loader limit'),
-    '#type' => 'textfield',
-    '#element_validate' => array('element_validate_number'),
-    '#default_value' => $config['imageLoaderLimit'],
-    '#description' => t('The maximum number of concurrent image downloads that can be performed by each viewer.'),
-  );
-
-  $form['deepzoom_config']['clickTimeThreshold'] = array(
-    '#title' => t('Click time threshold'),
-    '#type' => 'textfield',
-    '#element_validate' => array('element_validate_number'),
-    '#default_value' => $config['clickTimeThreshold'],
-    '#description' => t('The maximum number of milliseconds that can pass between a mousedown and a mouseup for the action to still be considered a "quick" click.'),
-  );
-
-  $form['deepzoom_config']['clickDistThreshold'] = array(
-    '#title' => t('Click distance threshold'),
-    '#type' => 'textfield',
-    '#element_validate' => array('element_validate_number'),
-    '#default_value' => $config['clickDistThreshold'],
-    '#description' => t('The maximum number of pixels the mouse can move between a mousedown and a mouseup for the action to still be considered a "quick" click.'),
-  );
-
-  $form['deepzoom_config']['zoomPerClick'] = array(
-    '#title' => t('Zoom per click'),
-    '#type' => 'textfield',
-    '#element_validate' => array('element_validate_number'),
-    '#default_value' => $config['zoomPerClick'],
-    '#description' => t('The factor by which images should zoom when clicked on.'),
-  );
-
-  $form['deepzoom_config']['zoomPerScroll'] = array(
-    '#title' => t('Zoom per scroll'),
-    '#type' => 'textfield',
-    '#element_validate' => array('element_validate_number'),
-    '#default_value' => $config['zoomPerScroll'],
-    '#description' => t('The factor by which images should zoom when scrolled over.'),
-  );
-
-  $form['deepzoom_config']['zoomPerSecond'] = array(
-    '#title' => t('Zoom per second'),
-    '#type' => 'textfield',
-    '#element_validate' => array('element_validate_number'),
-    '#default_value' => $config['zoomPerSecond'],
-    '#description' => t('The factor by which images should zoom over each second when the zoom buttons are held down.'),
-  );
-
-  $form['deepzoom_config']['proxyUrl'] = array(
-    '#title' => t('Proxy URL'),
-    '#type' => 'textfield',
-    '#default_value' => $config['proxyUrl'],
-    '#description' => t('The URL to prefix before any AJAX requests to overcome browser cross-site restrictions. The URL should be of the form "some/proxy.aspx?site=", so that the target site URL is passed as a GET parameter to the proxy. This URL can be absolute or relative, but must be on the same domain as the HTML page. If relative, it must be relative to the HTML page.'),
-  );
-
-  $form['deepzoom_config']['imagePath'] = array(
-    '#title' => t('Image path'),
-    '#type' => 'textfield',
-    '#default_value' => $config['imagePath'],
-    '#description' => t('The path for all UI images. This can be absolute or relative. If relative, it must be relative to the HTML page. A change to this value will only affect new viewers.'),
-  );
-
-  $form['deepzoom_config']['tile_size'] = array(
-    '#title' => t('tile size'),
-    '#type' => 'textfield',
-    '#default_value' => $config['tile_size'],
-    '#description' => t('tile size setting.'),
-  );
-
-  $form['deepzoom_config']['tile_overlap'] = array(
-    '#title' => t('tile overlap'),
-    '#type' => 'textfield',
-    '#default_value' => $config['tile_overlap'],
-    '#description' => t('tile overlap setting.'),
-  );
-
-  return system_settings_form($form);
-}
-
-/**
- * Implements hook_form_FORM_ID_alter().
- */
-function deepzoom_form_deepzoom_configuration_form_alter(&$form, $form_state) {
-  $form['#submit'][] = 'deepzoom_configuration_form_submit';
-}
-
-/**
- * Submit callback form Deep Zoom configuration form.
- */
-function deepzoom_configuration_form_submit($form = array(), $form_state = array()) {
-  $directory = 'public://deepzoom';
-  if (file_prepare_directory($directory, FILE_CREATE_DIRECTORY)) {
-    $data = '';
-    foreach (deepzoom_load_defaults() as $key => $value) {
-      $data .= "Seadragon.Config.{$key} = " . drupal_json_encode($value) . ";\r\n";
-    }
-    file_save_data($data, "{$directory}/deepzoom_config.js", FILE_EXISTS_REPLACE);
-    drupal_flush_all_caches();
+  $function = isset($engines[$engine]['callbacks']['page alter']) ? $engines[$engine]['callbacks']['page alter'] : 'deepzoom_engine_{$engine}_page_alter';
+  if (function_exists($function)) {
+    $function($variables);
   }
 }
 
 /**
- *
+ * Get all available Deep Zoom engines information.
  */
-function deepzoom_load_defaults() {
-  return variable_get('deepzoom_config', array(
-    'debugMode' => FALSE,
-    'animationTime' => 1.5,
-    'blendTime' => 0.5,
-    'alwaysBlend' => FALSE,
-    'autoHideControls' => TRUE,
-    'immediateRender' => FALSE,
-    'wrapHorizontal' => FALSE,
-    'wrapVertical' => FALSE,
-    'wrapOverlays' => FALSE,
-    'transformOverlays' => FALSE,
-    'minZoomImageRatio' => 0.8,
-    'maxZoomPixelRatio' => 2,
-    'visibilityRatio' => 0.5,
-    'springStiffness' => 5.0,
-    'imageLoaderLimit' => 2,
-    'clickTimeThreshold' => 200,
-    'clickDistThreshold' => 5,
-    'zoomPerClick' => 2,
-    'zoomPerScroll' => 1.2,
-    'zoomPerSecond' => 2,
-    'proxyUrl' => NULL,
-    'imagePath' => base_path() . libraries_get_path('seadragon') . '/img/',
-    'tile_size' => 254,
-    'tile_overlap' => 1,
-  ));
+function deepzoom_get_engines() {
+  $engines = &drupal_static(__FUNCTION__, array());
+  if (empty($engines)) {
+    $engines = module_invoke_all('deepzoom_engine_info');
+  }
+  return $engines;
 }
 
 /**
@@ -398,35 +154,9 @@ function deepzoom_generate_image_info($uri, $md5) {
 }
 
 /**
- * Theme function; Deep Zoom.
+ * Preprocess function for Deep Zoom Wrapper theme function.
  */
-function theme_deepzoom($variables) {
-  $element = array();
-
-  $images = is_array($variables['images']) ? $variables['images'] : array(md5_file($variables['images']) => $variables['images']);
-  $status = deepzoom_generate_deepzoom($images, $variables['processor']);
-
-  foreach ($images as $md5 => $uri) {
-    if ($status[$uri]) {
-      $element[] = array(
-        '#markup' => "<div id='deepzoom-{$md5}-" . rand(1000, 9999) . "' class='deepzoom'></div>",
-      );
-    }
-
-    // Fallback image.
-    else {
-      $element[] = array(
-        '#theme' => 'image_style',
-        '#path' => str_replace(DRUPAL_ROOT, '', $uri),
-        '#style_name' => $variables['image_style'],
-      );
-    }
-  }
-
-  // Nothing to return;
-  if (!isset($element[0])) {
-    return FALSE;
-  }
-
-  return $element;
+function template_preprocess_deepzoom_wrapper(&$vars) {
+  $vars['classes_array'][] = 'deepzoom';
+  $vars['attributes_array']['id'] = "deepzoom-{$vars['md5']}-" . rand(1000, 9999);
 }

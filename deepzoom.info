@@ -4,15 +4,11 @@ configure = admin/config/media/deepzoom
 core = 7.x
 
 ; Dependencies.
-dependencies[] = image
 dependencies[] = libraries
 
 ; Core files.
 files[] = deepzoom.module
 
-; Module integrations.
-files[] = includes/background_batch.module
-files[] = includes/deepzoom.module
-files[] = includes/field.module
-files[] = includes/filter.module
-files[] = includes/system.module
+; Deep Zoom Engines
+files[] = engines/openseadragon.inc
+files[] = engines/seadragon.inc

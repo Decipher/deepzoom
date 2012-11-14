@@ -5,24 +5,45 @@
  */
 
 /**
- * Implements hook_requirements().
+ * Implements hook_uninstall().
  */
-function deepzoom_requirements($phase) {
-  $requirements = array();
-  // Ensure translations don't break at install time
-  $t = get_t();
+function deepzoom_uninstall() {
+  variable_del('deepzoom_config');
+  // @TODO - Recursively delete deepzoom folder.
+}
 
-  // Seadragon Ajax library.
-  if (!function_exists('libraries_get_libraries')) {
-    module_enable(array('libraries'));
-  }
-  if (!in_array('seadragon', array_keys(libraries_get_libraries()))) {
-    $requirements['seadragon'] = array(
-      'title' => $t('Seadragon Ajax library'),
-      'description' => $t('Seadragon Ajax library missing, please view the !readme for installation instructions.', array('!readme' => l('README.txt', drupal_get_path('module', 'deepzoom') . '/README.txt'))),
-      'severity' => REQUIREMENT_ERROR,
-    );
+/**
+ * Set the engine to Seadragon Ajax.
+ */
+function deepzoom_update_7100() {
+  // Set the engine to Seadragon Ajax.
+  $config = variable_get('deepzoom_config', array());
+  $config['engine'] = 'seadragon';
+  variable_set('deepzoom_config', $config);
+
+  // Update all instances using the old 'deepzoom_deepzoom' formatter.
+  $fields = field_info_fields();
+  foreach ($fields as $field) {
+    if ('image' == $field['module']) {
+      foreach ($field['bundles'] as $entity_type => $bundles) {
+        foreach ($bundles as $bundle_name) {
+          $instance = field_info_instance($entity_type, $field['field_name'], $bundle_name);
+
+          $update = FALSE;
+          foreach ($instance['display'] as $view_mode => $display) {
+            if ('deepzoom_deepzoom' == $display['type']) {
+              $instance['display'][$view_mode]['type'] = 'deepzoom_image';
+              $update = TRUE;
+            }
+          }
+
+          if ($update) {
+            field_update_instance($instance);
+          }
+        }
+      }
+    }
   }
 
-  return $requirements;
+  drupal_flush_all_caches();
 }

@@ -3,8 +3,14 @@ Deep Zoom 7.x-1.x-dev, xxxx-xx-xx (Development release)
 
 - #1702124: Added cacheable JS configuration.
 - Fixed issue when installing with Libraries module disabled.
+- Fixed typo in menu path.
 - Added processor hook and settings.
 - Added Background Batch processor.
+- Added File field formatter.
+- Added help documentation.
+- Added a modular engine system.
+- Removed dependency on Image module.
+- Removed dependency on Seadragon Ajax library.
 
 
 Deep Zoom 7.x-1.1, 2011-10-01
