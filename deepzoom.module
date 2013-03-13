@@ -138,7 +138,7 @@ function deepzoom_generate_image_info($uri, $md5) {
   );
   $info['num_levels'] = (int) ceil(log($info['max_dimension'], 2));
 
-  foreach (range(9, $info['num_levels']) as $level) {
+  foreach (range(0, $info['num_levels']) as $level) {
     $info['levels'][$level] = array();
     $info['levels'][$level]['scale'] = pow(0.5, $info['num_levels'] - $level);
     $info['levels'][$level]['width'] = (int) ceil($info['width'] * $info['levels'][$level]['scale']);

@@ -49,7 +49,7 @@ function deepzoom_generate_deepzoom_batch_process($uri, $md5, &$context) {
       'tile_size' => 254,
       'tile_overlap' => 1,
     ));
-    $context['sandbox']['level'] = 9;
+    $context['sandbox']['level'] = 0;
     $context['sandbox']['column'] = 0;
     $context['sandbox']['row'] = 0;
     $context['sandbox']['level_progress'] = 0;

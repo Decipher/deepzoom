@@ -9,8 +9,11 @@ Deep Zoom 7.x-1.x-dev, xxxx-xx-xx (Development release)
 - Added File field formatter.
 - Added help documentation.
 - Added a modular engine system.
+- Added support for OpenSeadragon.
+- Updated generation for smaller derivatives.
 - Removed dependency on Image module.
 - Removed dependency on Seadragon Ajax library.
+- Removed makefile.
 
 
 Deep Zoom 7.x-1.1, 2011-10-01

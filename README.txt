@@ -45,6 +45,13 @@ Installation
    https://github.com/aseemk/seadragon-ajax/zipball/v0.8.9 and extract it to
    your Libraries folder as 'seadragon', eg. '/sites/all/libraries/seadragon'.
 
+   or
+
+   Download the OpenSeadragon library from
+   https://github.com/openseadragon/openseadragon/archive/master.zip and extract
+   it to your Libraries folder as 'openseadragon', eg.
+   '/sites/all/libraries/openseadragon'.
+
 2. Install module as usual, see http://drupal.org/node/895232 for further
    information.
 
