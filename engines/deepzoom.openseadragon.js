@@ -5,8 +5,8 @@
         id = $(this).attr('id').split('-');
         viewer = new OpenSeadragon.Viewer({
           id: id.join('-'),
-          prefixUrl: '/sites/dz.ld/libraries/openseadragon/images/',
-          tileSources: '/sites/dz.ld/files/deepzoom/' + id[1] + '.dzi',
+          prefixUrl: Drupal.settings.deepZoom.library + '/images/',
+          tileSources: Drupal.settings.deepZoom.path + '/' + id[1] + '.dzi',
         });
       });
     }

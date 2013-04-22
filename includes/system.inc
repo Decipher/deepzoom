@@ -45,10 +45,7 @@ function deepzoom_generate_deepzoom_batch($images) {
 function deepzoom_generate_deepzoom_batch_process($uri, $md5, &$context) {
  if (empty($context['sandbox'])) {
     $context['sandbox']['image'] = deepzoom_generate_image_info($uri, $md5);
-    $context['sandbox']['config'] = variable_get('deepzoom_config', array(
-      'tile_size' => 254,
-      'tile_overlap' => 1,
-    ));
+    $context['sandbox']['config'] = deepzoom_config();
     $context['sandbox']['level'] = 0;
     $context['sandbox']['column'] = 0;
     $context['sandbox']['row'] = 0;

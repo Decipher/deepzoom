@@ -82,16 +82,45 @@ function deepzoom_menu() {
  * Implements hook_page_alter().
  */
 function deepzoom_page_alter($variables) {
-  $config = variable_get('deepzoom_config', array());
-  $engines = deepzoom_get_engines();
-  $engine = $config['engine'];
+  $config = deepzoom_config();
+  if (!empty($config)) {
+    $engines = deepzoom_get_engines();
+    $engine = $config['engine'];
 
-  drupal_add_css(drupal_get_path('module', 'deepzoom') . '/deepzoom.css');
+    drupal_add_css(drupal_get_path('module', 'deepzoom') . '/deepzoom.css');
 
-  $function = isset($engines[$engine]['callbacks']['page alter']) ? $engines[$engine]['callbacks']['page alter'] : 'deepzoom_engine_{$engine}_page_alter';
-  if (function_exists($function)) {
-    $function($variables);
+    $vars = array('variables' => $variables);
+    deepzoom_invoke('page alter', $vars);
   }
+}
+
+/**
+ * Returns Deep Zoom configuration.
+ */
+function deepzoom_config() {
+  $config = variable_get('deepzoom_config', array());
+
+  // Provide default configuraiton if not set.
+  if (empty($config)) {
+    $engines = deepzoom_get_engines();
+    if (!empty($engines)) {
+      $engine = key($engines);
+
+      // Get configuration defaults.
+      $function = isset($engines[$engine]['callbacks']['defaults']) ? $engines[$engine]['callbacks']['defaults'] : "deepzoom_engine_{$engine}_defaults";
+      if (function_exists($function)) {
+        $config = $function();
+      }
+      $config['engine'] = $engine;
+    }
+
+    // No engine installed.
+    else {
+      // @TODO - Error
+    }
+  }
+
+  return $config;
 }
 
 /**
@@ -120,10 +149,7 @@ function deepzoom_generate_deepzoom($images, $method = 'batch') {
  * Deep Zoom generate image info callback.
  */
 function deepzoom_generate_image_info($uri, $md5) {
-  $config = variable_get('deepzoom_config', array(
-    'tile_size' => 254,
-    'tile_overlap' => 1,
-  ));
+  $config = deepzoom_config();
   extract($config);
 
   $image = image_load($uri);
@@ -151,6 +177,22 @@ function deepzoom_generate_image_info($uri, $md5) {
   }
 
   return $info;
+}
+
+/**
+ * Deep zoom invoke function; calls engine specific callback functions.
+ */
+function deepzoom_invoke($callback, &$vars = array(), $engine = NULL) {
+  if (is_null($engine)) {
+    $config = deepzoom_config();
+    $engines = deepzoom_get_engines();
+    $engine = $config['engine'];
+  }
+
+  $function = isset($engines[$engine]['callbacks'][$callback]) ? $engines[$engine]['callbacks'][$callback] : "deepzoom_engine_{$engine}_" . str_replace(' ', '_', $callback);
+  if (function_exists($function)) {
+    return $function($vars);
+  }
 }
 
 /**

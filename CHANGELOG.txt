@@ -9,11 +9,15 @@ Deep Zoom 7.x-1.x-dev, xxxx-xx-xx (Development release)
 - Added File field formatter.
 - Added help documentation.
 - Added a modular engine system.
+- Added makefile entries documentation.
 - Added support for OpenSeadragon.
+- Added Drush command to download library.
 - Updated generation for smaller derivatives.
 - Removed dependency on Image module.
 - Removed dependency on Seadragon Ajax library.
 - Removed makefile.
+- Removed dependency on Libraries API module.
+
 
 
 Deep Zoom 7.x-1.1, 2011-10-01
@@ -21,6 +25,7 @@ Deep Zoom 7.x-1.1, 2011-10-01
 
 - #1296028: Fixed issue with generating .dzi file in Apache.
 - Fixed Text format filter js and css caching issues.
+
 
 
 Deep Zoom 7.x-1.0, 2011-09-30

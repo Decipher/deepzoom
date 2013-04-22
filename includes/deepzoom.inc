@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * DeepZoom module integration.
+ * Deep Zoom module integration.
  */
 
 /**
@@ -9,7 +9,17 @@
  */
 function deepzoom_deepzoom_engine_info() {
   $items = array();
-  foreach (array_keys(libraries_get_libraries()) as $library) {
+
+  if (module_exists('libraries')) {
+    $libraries = array_keys(libraries_get_libraries());
+  }
+  else {
+    $libraries = glob('sites/all/libraries/*', GLOB_ONLYDIR);
+    foreach ($libraries as $delta => $library) {
+      $libraries[$delta] = str_replace('sites/all/libraries/', '', $library);
+    }
+  }
+  foreach ($libraries as $library) {
     if (file_exists($file = drupal_get_path('module', 'deepzoom') . "/engines/{$library}.inc")) {
       require_once $file;
       if (function_exists($function = "deepzoom_engine_{$library}_info")) {
@@ -17,6 +27,7 @@ function deepzoom_deepzoom_engine_info() {
       }
     }
   }
+
   return $items;
 }
 

@@ -21,13 +21,7 @@ Features
     * File field formatter.
   * Text format filter.
 * Batch API based image processor.
-
-
-
-Required Modules
---------------------------------------------------------------------------------
-
-* Libraries API - http://drupal.org/project/libraries
+* Drush downloader for required libraries.
 
 
 
@@ -35,25 +29,50 @@ Recommended Modules
 --------------------------------------------------------------------------------
 
 * Background Batch (via Background Process) - http://drupal.org/project/background_process
+* Libraries API                             - http://drupal.org/project/libraries
 
 
 
 Installation
 --------------------------------------------------------------------------------
 
-1. Download the Seadragon Ajax library from
-   https://github.com/aseemk/seadragon-ajax/zipball/v0.8.9 and extract it to
-   your Libraries folder as 'seadragon', eg. '/sites/all/libraries/seadragon'.
+1. Download the OpenSeadragon library from
+   https://github.com/openseadragon/site-build/raw/master/built-openseadragon/openseadragon.zip
+   and extract it to your Libraries folder as 'openseadragon', eg.
+   '/sites/all/libraries/openseadragon'.
 
    or
 
-   Download the OpenSeadragon library from
-   https://github.com/openseadragon/openseadragon/archive/master.zip and extract
-   it to your Libraries folder as 'openseadragon', eg.
-   '/sites/all/libraries/openseadragon'.
+   Download the Seadragon Ajax library from
+   https://github.com/aseemk/seadragon-ajax/archive/v0.8.9.zip and extract it to
+   your Libraries folder as 'seadragon', eg. '/sites/all/libraries/seadragon'.
+
+
+   Note: If you wish to keep the Seadragon or OpenSeadragon library in a
+         directory other than the examples you will need to install the
+         Libraries API module first.
+
+
+  Note: If you have Drush you can also use the 'deepzoom-library' Drush command
+        to download your library of choice. Type 'drush dzlib --help' for more
+        information.
+
 
 2. Install module as usual, see http://drupal.org/node/895232 for further
    information.
+
+
+
+OpenSeadragon
+--------------------------------------------------------------------------------
+
+As of Deep Zoom 1.2, support for the OepnSeadragon has been introduced as a
+completely open source alternative to the Microsoft Seadragon Ajax library.
+
+Support is only minimal, but new functionality will be introduced in future
+releases.
+
+OpenSeadragon is the recommended library for use with the Deep Zoom module.
 
 
 
@@ -93,3 +112,24 @@ To do so, you will need to follow these instructions:
 
 8. Upload the Zip archive to a File field that uses the Deep Zoom field
    formatter.
+
+
+
+Makefile entries
+--------------------------------------------------------------------------------
+
+For easy downloading of Deep Zoom and it's required modules and/or libraries,
+you can use the following entries in your makefile:
+
+
+  projects[deepzoom][subdir] = contrib
+  projects[deepzoom][version] = 1.2
+
+  projects[libraries][subdir] = contrib
+  projects[libraries][version] = 2.0
+
+  libraries[seadragon][download][type] = get
+  libraries[seadragon][download][url] = https://github.com/aseemk/seadragon-ajax/zipball/v0.8.9
+
+  libraries[openseadragon][download][type] = get
+  libraries[openseadragon][download][url] = https://github.com/openseadragon/site-build/raw/34832de71fe659f7571320abc8bcc4b27e2e0833/built-openseadragon/openseadragon.zip

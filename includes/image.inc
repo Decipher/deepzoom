@@ -37,7 +37,8 @@ function image_deepzoom_field_formatter_info_alter(&$items) {
     'field types' => array('image'),
     'settings' => array(
       'deepzoom_processor' => 'batch',
-      'deepzoom_image_style' => 'large'
+      'deepzoom_image_style' => 'large',
+      'engine_settings' => array(),
     ),
   );
 }
@@ -46,9 +47,18 @@ function image_deepzoom_field_formatter_info_alter(&$items) {
  * Field formatter settings summary callback for Deep Zoom Image formatter.
  */
 function deepzoom_image_field_formatter_settings_summary($settings) {
-  $summary = t('DeepZoom processor: @processor', array('@processor' => $settings['deepzoom_processor'])) . '<br />';
+  $summary = t('Deep Zoom processor: @processor', array('@processor' => $settings['deepzoom_processor'])) . '<br />';
   $summary .= t('Fallback image style: @image_style', array('@image_style' => $settings['deepzoom_image_style']));
-  return $summary;
+
+  $config = deepzoom_config();
+  $engines = deepzoom_get_engines();
+  $engine = $config['engine'];
+
+  // Engine specific summary.
+  $vars = array('summary' => $summary, 'settings' => $settings);
+  deepzoom_invoke('formatter summary', $vars);
+
+  return $vars['summary'];
 }
 
 /**
@@ -77,7 +87,11 @@ function deepzoom_image_field_formatter_settings_form($settings) {
     $element['deepzoom_image_style']['#options'][$image_style] = $image_style;
   }
 
-  return $element;
+  // Engine specific settings.
+  $vars = array('element' => $element, 'settings' => $settings);
+  deepzoom_invoke('formatter settings', $vars);
+
+  return $vars['element'];
 }
 
 /**

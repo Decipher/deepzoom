@@ -7,7 +7,7 @@
  * Deep Zoom configuration form.
  */
 function deepzoom_configuration_form($form, &$form_state) {
-  $config = variable_get('deepzoom_config', array());
+  $config = deepzoom_config();
   $engines = deepzoom_get_engines();
 
   $form['deepzoom_config'] = array(
@@ -45,16 +45,12 @@ function deepzoom_configuration_form($form, &$form_state) {
   );
 
   // Get configuration defaults.
-  $function = isset($engines[$engine]['callbacks']['defaults']) ? $engines[$engine]['callbacks']['defaults'] : 'deepzoom_engine_{$engine}_defaults';
-  if (function_exists($function)) {
-    $config = $function();
-  }
+  $vars = array();
+  $config = deepzoom_invoke('defaults', $vars, $engine);
 
   // Attach settings form.
-  $function = isset($engines[$engine]['callbacks']['settings form']) ? $engines[$engine]['callbacks']['settings form'] : 'deepzoom_engine_{$engine}_settings_form';
-  if (function_exists($function)) {
-    $form['deepzoom_config'] += $function($config);
-  }
+  $vars = array('config' => $config);
+  $form['deepzoom_config'] += deepzoom_invoke('settings form', $vars, $engine);
 
   $form['#submit'][] = 'deepzoom_configuration_form_submit';
 
@@ -69,10 +65,8 @@ function deepzoom_configuration_form_submit($form, &$form_state) {
   $engine = $form_state['values']['deepzoom_config']['engine'];
 
   // Attach submit callback.
-  $function = isset($engines[$engine]['callbacks']['submit']) ? $engines[$engine]['callbacks']['submit'] : 'deepzoom_engine_{$engine}_submit';
-  if (function_exists($function)) {
-    $function($form, $form_state);
-  }
+  array('form' => $form, 'form_state' => $form_state);
+  deepzoom_invoke('submit', $vars);
 }
 
 /**

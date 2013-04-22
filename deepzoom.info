@@ -3,11 +3,12 @@ description = "Deep Zoom provides the ability to create interactively viewable h
 configure = admin/config/media/deepzoom
 core = 7.x
 
-; Dependencies.
-dependencies[] = libraries
+
 
 ; Core files.
 files[] = deepzoom.module
+
+
 
 ; Deep Zoom Engines
 files[] = engines/openseadragon.inc

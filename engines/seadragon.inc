@@ -23,6 +23,7 @@ function deepzoom_engine_seadragon_info(&$items) {
  * Defaults callback for Seadragon Ajax engine.
  */
 function deepzoom_engine_seadragon_defaults() {
+  $path = module_exists('libraries') ? libraries_get_path('seadragon') : 'sites/all/libraries/seadragon';
   $defaults = array(
     'debugMode' => FALSE,
     'animationTime' => 1.5,
@@ -45,7 +46,7 @@ function deepzoom_engine_seadragon_defaults() {
     'zoomPerScroll' => 1.2,
     'zoomPerSecond' => 2,
     'proxyUrl' => NULL,
-    'imagePath' => base_path() . libraries_get_path('seadragon') . '/img/',
+    'imagePath' => base_path() . $path . '/img/',
     'tile_size' => 254,
     'tile_overlap' => 1,
   );
@@ -55,9 +56,11 @@ function deepzoom_engine_seadragon_defaults() {
 /**
  * Page alter callback for Seadragon Ajax engine.
  */
-function deepzoom_engine_seadragon_page_alter($variables) {
+function deepzoom_engine_seadragon_page_alter($vars) {
+  $path = module_exists('libraries') ? libraries_get_path('seadragon') : 'sites/all/libraries/seadragon';
+
   drupal_add_js(drupal_get_path('module', 'deepzoom') . '/engines/deepzoom.seadragon.js');
-  drupal_add_js(libraries_get_path('seadragon') . '/seadragon-min.js');
+  drupal_add_js($path . '/seadragon-min.js');
   drupal_add_js(array('deepZoom' => array(
     'path' => file_create_url('public://deepzoom')
   )), 'setting');
@@ -269,7 +272,7 @@ function deepzoom_engine_seadragon_settings_form($config) {
 /**
  * Submit callback for Seadragon Ajax engine.
  */
-function deepzoom_engine_seadragon_submit($form = array(), $form_state = array()) {
+function deepzoom_engine_seadragon_submit($vars) {
   $directory = 'public://deepzoom';
   if (file_prepare_directory($directory, FILE_CREATE_DIRECTORY)) {
     $data = '';
