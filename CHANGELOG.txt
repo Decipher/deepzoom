@@ -13,6 +13,7 @@ Deep Zoom 7.x-1.x-dev, xxxx-xx-xx (Development release)
 - Added support for OpenSeadragon.
 - Added Drush command to download library.
 - Updated generation for smaller derivatives.
+- Updated handling when libraries are missing.
 - Removed dependency on Image module.
 - Removed dependency on Seadragon Ajax library.
 - Removed makefile.

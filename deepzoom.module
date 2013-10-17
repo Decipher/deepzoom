@@ -82,7 +82,7 @@ function deepzoom_menu() {
  * Implements hook_page_alter().
  */
 function deepzoom_page_alter($variables) {
-  $config = deepzoom_config();
+  $config = deepzoom_config(FALSE);
   if (!empty($config)) {
     $engines = deepzoom_get_engines();
     $engine = $config['engine'];
@@ -97,11 +97,11 @@ function deepzoom_page_alter($variables) {
 /**
  * Returns Deep Zoom configuration.
  */
-function deepzoom_config() {
-  $config = variable_get('deepzoom_config', array());
+function deepzoom_config($warn = TRUE) {
+  $config = &drupal_static(__FUNCTION__, variable_get('deepzoom_config', array()));
 
   // Provide default configuraiton if not set.
-  if (empty($config)) {
+  if (is_array($config) && empty($config)) {
     $engines = deepzoom_get_engines();
     if (!empty($engines)) {
       $engine = key($engines);
@@ -116,7 +116,15 @@ function deepzoom_config() {
 
     // No engine installed.
     else {
-      // @TODO - Error
+      if ($warn) {
+        drupal_set_message(t('Deep Zoom is missing an engine, please view the !readme for installation instructions.', array(
+          '!readme' => l('README.txt', drupal_get_path('module', 'deepzoom') . '/README.txt'
+        ))), 'error');
+        watchdog('deepzoom', 'Deep Zoom is missing an engine, please view the !readme for installation instructions.', array(
+          '!readme' => l('README.txt', drupal_get_path('module', 'deepzoom') . '/README.txt'
+        ), WATCHDOG_ERROR));
+      }
+      $config = FALSE;
     }
   }
 
@@ -185,8 +193,13 @@ function deepzoom_generate_image_info($uri, $md5) {
 function deepzoom_invoke($callback, &$vars = array(), $engine = NULL) {
   if (is_null($engine)) {
     $config = deepzoom_config();
-    $engines = deepzoom_get_engines();
-    $engine = $config['engine'];
+    if ($config) {
+      $engines = deepzoom_get_engines();
+      $engine = $config['engine'];
+    }
+    else {
+      return FALSE;
+    }
   }
 
   $function = isset($engines[$engine]['callbacks'][$callback]) ? $engines[$engine]['callbacks'][$callback] : "deepzoom_engine_{$engine}_" . str_replace(' ', '_', $callback);

@@ -9,7 +9,10 @@
  */
 function deepzoom_field_formatter_info() {
   $items = array();
-  drupal_alter('deepzoom_field_formatter_info', $items);
+  $config = deepzoom_config(FALSE);
+  if ($config) {
+    drupal_alter('deepzoom_field_formatter_info', $items);
+  }
   return $items;
 }
 

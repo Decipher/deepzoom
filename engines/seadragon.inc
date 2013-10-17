@@ -75,8 +75,9 @@ function deepzoom_engine_seadragon_page_alter($vars) {
 /**
  * Settings form callback for Seadragon Ajax engine.
  */
-function deepzoom_engine_seadragon_settings_form($config) {
+function deepzoom_engine_seadragon_settings_form(&$vars) {
   $form = array();
+  $config = $vars['config'];
 
   $form['debugMode'] = array(
     '#title' => t('Debug mode'),
@@ -272,11 +273,17 @@ function deepzoom_engine_seadragon_settings_form($config) {
 /**
  * Submit callback for Seadragon Ajax engine.
  */
-function deepzoom_engine_seadragon_submit($vars) {
+function deepzoom_engine_seadragon_submit($vars = array()) {
   $directory = 'public://deepzoom';
   if (file_prepare_directory($directory, FILE_CREATE_DIRECTORY)) {
     $data = '';
-    foreach (deepzoom_engine_seadragon_defaults() as $key => $value) {
+    if (!empty($vars)) {
+      $config = $vars['form_state']['values']['deepzoom_config'];
+    }
+    else {
+      $config = deepzoom_engine_seadragon_defaults();
+    }
+    foreach ($config as $key => $value) {
       $data .= "Seadragon.Config.{$key} = " . drupal_json_encode($value) . ";\r\n";
     }
     file_save_data($data, "{$directory}/deepzoom_config.js", FILE_EXISTS_REPLACE);
